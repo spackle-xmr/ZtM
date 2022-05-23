@@ -438,11 +438,12 @@ print('254 (mod 13)=',euclid)
 
 
 
+"""
 print('D=',d)
 print('I=',I)
 print('Bx=',Bx)
 print('By=    ',By)
-
+"""
 
 """
 #Let's find y
