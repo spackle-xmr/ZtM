@@ -396,7 +396,7 @@ print('8^7 (mod 9) =',exp_answer)
 inv_py_5=pow(5,q-2,q)
 print('1/5 (mod q) =',inv_py_5)
 one_check=inv_py_5 * 5 % q
-print('5 * 1/5 =',one_check)
+print('5 * 1/5 (mod q) =',one_check)
 """
 
 
