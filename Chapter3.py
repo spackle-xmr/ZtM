@@ -76,7 +76,7 @@ print('c =      ', c)
 print('cprime = ',cprime)
 '''
 
-
+'''
 # 3.3 SAG
 
 m="Someone among us said this."
@@ -119,5 +119,5 @@ for index in range(1,count+1):
 if c[0] == cprime[count]:
     print('Valid')
 
-
+'''
 
