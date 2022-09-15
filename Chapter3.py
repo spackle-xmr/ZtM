@@ -1,5 +1,3 @@
-# built off https://github.com/coinstudent2048/ecc_tutorials
-
 from dumb25519 import Scalar, Point
 import dumb25519
 import random
@@ -13,30 +11,32 @@ G=dumb25519.G
 
 # Non-interactive proof
 k=dumb25519.random_scalar()
-#K= k * G
 count = 20 # base key count
 J= []
 J= [dumb25519.random_point() for i in range(count)]
 K= [k * value for value in J]
+
+# 1. Generate random numbers alpha and compute alpha * J
 alpha= dumb25519.random_scalar()
 alphaJ = [alpha * value for value in J]
+
+# 2. Calculate the challenge
 c=dumb25519.hash_to_scalar((J[i] for i in range(count)),(K[i] for i in range(count)),(alphaJ[i] for i in range(count)))
 
-
+# 3. Define the response
 r=alpha - c * k
-# Printing values during calculation breaks process?! Example:
-#print(K) 
 
+# 4. Publish signature
+signature=(c,r)
 
 # Verification
-Comp=[r * J[i] + c * K[i] for i in range(count)]
 
-cprime= dumb25519.hash_to_scalar((J[i] for i in range(count)),(K[i] for i in range(count)),(Comp[i] for i in range(count)))
+# 1. Calculate the challenge
+Computation=[signature[1] * J[i] + signature[0] * K[i] for i in range(count)]
+cprime= dumb25519.hash_to_scalar((J[i] for i in range(count)),(K[i] for i in range(count)),(Computation[i] for i in range(count)))
 
 
-#print(J)
-#print(Comp)
-#print(r)
+# 2. Check c == cprime
 print('c =      ', c)
 print('cprime = ',cprime)
 '''
@@ -47,83 +47,76 @@ count = 20 # key count
 
 # Non-interactive proof
 k=[dumb25519.random_scalar() for i in range(count)]
-#K= k * G
-
 J= []
 J= [dumb25519.random_point() for i in range(count)]
 K= [k[i] * J[i] for i in range(count)]
+
+# 1. Generate random numbers alpha and compute alpha * J
 alpha= [dumb25519.random_scalar() for i in range(count)]
 alphaJ = [alpha[i] * J[i] for i in range(count)]
+
+# 2. Calculate the challenge
 c=dumb25519.hash_to_scalar((J[i] for i in range(count)),(K[i] for i in range(count)),(alphaJ[i] for i in range(count)))
 
-
+# 3. Define each response
 r=[alpha[i] - c * k[i] for i in range(count)]
 
-# Printing values during calculation breaks process?! Example:
-#print(K)
+# 4. Publish the signature
+signature = (c,r)
 
 
 # Verification -- same as before, with individualized responses
-Comp=[r[i] * J[i] + c * K[i] for i in range(count)]
 
-cprime= dumb25519.hash_to_scalar((J[i] for i in range(count)),(K[i] for i in range(count)),(Comp[i] for i in range(count)))
+# 1. Calculate the challenge
+Computation=[signature[1][i] * J[i] + signature[0] * K[i] for i in range(count)]
+cprime= dumb25519.hash_to_scalar((J[i] for i in range(count)),(K[i] for i in range(count)),(Computation[i] for i in range(count)))
 
+# 2. Check c == cprime
 print('c =      ', c)
 print('cprime = ',cprime)
 '''
-
 
 '''
 # 3.3 SAG
 
 m="Someone among us said this."
 count = 20 # key count
-pi= random.randint(0, count-2) #Cut end to make life easy
+pi= count-1 #Set pi as final index to simplify example code. Same effect as a random selection with the elements rearranged.
 k_pi=dumb25519.random_scalar()
 K_pi= k_pi * G
 R= [dumb25519.random_point() for i in range(count)]
 R[pi]=K_pi
 
-
-# Step 1
+# 1. Generate random number alpha, and fake responses for all but pi
 alpha= dumb25519.random_scalar()
 alphaG= alpha * G
 c=[Scalar(0)]*count
 r=[dumb25519.random_scalar() for i in range(count)]
 r[pi]=Scalar(0) # exclude i = pi
 
-# Step 2
-c[pi+1]=dumb25519.hash_to_scalar((R[i] for i in range(count)),m, alphaG)
+# 2. Calculate challenge for pi+1
+c[0]=dumb25519.hash_to_scalar((R[i] for i in range(count)),m, alphaG)
 
-# Step 3 Starting after pi, calculate challenges
-for index in range(pi+1,count-1):
-    c[index+1]=dumb25519.hash_to_scalar((R[i] for i in range(count)),m, r[index] * G + c[index] * R[index])
-c[0]=dumb25519.hash_to_scalar((R[i] for i in range(count)),m, r[-1] * G + c[-1] * R[-1])
-for index in range(0,pi):
+# 3. Starting after pi, calculate challenges
+for index in range(pi):
     c[index+1]=dumb25519.hash_to_scalar((R[i] for i in range(count)),m, r[index] * G + c[index] * R[index])
 
-
-# Step 4
+# 4. Define the real response
 r[pi] = alpha - c[pi] * k_pi
 
 
 #Verification
+
 cprime=[0]*count
 
-# Step 1
-for index in range(count-1):
-    cprime[index+1]=dumb25519.hash_to_scalar((R[i] for i in range(count)),m, r[index] * G + c[index] * R[index])
-cprime[0]=dumb25519.hash_to_scalar((R[i] for i in range(count)),m, r[-1] * G + c[-1] * R[-1])
+# 1. Compute set of cprime values
+for index in range(count):
+    cprime[index]=dumb25519.hash_to_scalar((R[i] for i in range(count)),m, r[index-1] * G + c[index-1] * R[index-1])
 
-#print(c)
-#print(cprime)
-#print(c[0])
-#print(cprime[0])
 
-# Step 2
-if cprime[0] == c[0]:
+# 2. Check c_1 == cprime_1, with cprime_1 being the last term calculated. 
+if cprime[pi] == c[pi]:
     print('Valid')
 '''
-
 
 
