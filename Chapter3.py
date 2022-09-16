@@ -30,12 +30,12 @@ r=alpha - c * k
 # 4. Publish signature
 signature=(c,r)
 
+
 # Verification
 
 # 1. Calculate the challenge
 Computation=[signature[1] * J[i] + signature[0] * K[i] for i in range(count)]
 cprime= dumb25519.hash_to_scalar((J[i] for i in range(count)),(K[i] for i in range(count)),(Computation[i] for i in range(count)))
-
 
 # 2. Check c == cprime
 print('c =      ', c)
@@ -47,6 +47,7 @@ print('cprime = ',cprime)
 count = 20 # key count
 
 # Non-interactive proof
+
 k=[dumb25519.random_scalar() for i in range(count)]
 J= []
 J= [dumb25519.random_point() for i in range(count)]
@@ -87,6 +88,8 @@ k_pi=dumb25519.random_scalar()
 K_pi= k_pi * G
 R= [dumb25519.random_point() for i in range(count)]
 R[pi]=K_pi
+
+# Signature
 
 # 1. Generate random number alpha, and fake responses for all but pi
 alpha= dumb25519.random_scalar()
@@ -155,6 +158,7 @@ for index in range(pi):
 # 5. Define real response
 r[pi] = alpha - c[pi] * k_pi
 
+
 #Verification
 cprime=[0]*(count+1)
 
@@ -174,12 +178,13 @@ if c[0] == cprime[count]:
     print('Valid')
 '''
 
+
+
 '''
-# NOT WORKING/IN PROGRESS
 # 3.5 MLSAG 
 # 2d set of public keys K_i_j, with knowledge of m private key k_pi_j for index i = pi
 m="Someone among us said this."
-count = 3 # key count (size of each dimension of R)
+count = 5 # key count (size of each dimension of R, for a total of count^2 keys)
 pi= count-1 #Set pi as final index to simplify example code. Same effect as a random selection with the elements rearranged.
 k_pi_j=[dumb25519.random_scalar() for i in range(count)]
 K_pi_j= [k_pi_j[i] * G for i in range(count)]
@@ -190,14 +195,12 @@ R[pi]=K_pi_j
 
 # 1. Calculate key images K_tilde_j
 K_tilde_j= [k_pi_j[j] * dumb25519.hash_to_point(K_pi_j[j]) for j in range(count)]
-#print(K_tilde_j)
 
 # 2. Generate random numbers alpha_j and r_i_j except for the pi set of j 
 alpha_j=[dumb25519.random_scalar() for i in range(count)]
-r_i_j=[[dumb25519.random_scalar() for i in range(count)] for j in range(count)]
+r_i_j=[[dumb25519.random_scalar() for j in range(count)] for i in range(count)]
 r_i_j[pi]=[0]*count # clear pi set of j
 c=[0]*count
-
 
 # 3. Compute challenge for pi+1 (note that pi+1 is index 0)
 #prepare ordered list of calculated items to hash
@@ -207,10 +210,50 @@ for index in range(count):
     alphaHash=alpha_j[index] * dumb25519.hash_to_point(K_pi_j[index])
     ordered[index*2]=alphaG
     ordered[index*2+1]=alphaHash
-
-#print(ordered)
 c[0]=dumb25519.hash_to_scalar(m, ordered)
-print(c)
 
-# 4. Compute other challenges
+# 4. Compute challenge set
+for number in range(0,pi):
+    ordered=[0]*(2*count)
+    for index in range(count):
+        rGcK=r_i_j[number][index] * G + c[number] * R[number][index]
+        rHashcK_tilde=r_i_j[number][index] * dumb25519.hash_to_point(R[number][index]) + c[number] * K_tilde_j[index]
+        ordered[index*2]=rGcK
+        ordered[index*2+1]=rHashcK_tilde
+    c[number+1]=dumb25519.hash_to_scalar(m, ordered)
+
+# 5. Define all r_pi_j = alpha_j - c_pi * k_pi_j
+for index in range(count):
+    r_i_j[pi][index]=alpha_j[index] - c[pi] * k_pi_j[index]
+
+
+# Verification
+cprime=[0]*(count+1)
+
+# 1. zero check all l * K_tilde_j
+for index in range(count):
+    zero_check= l * K_tilde_j[index]
+    if zero_check.x != 0:
+        print('Zero Check Fail')
+        break
+    if index == count-1:
+        print('Zero Check Passed')
+
+# 2. Compute cprime set
+cprime[0] = c[0] #start with signature value
+
+# Exact same calculation performed in Signature step 4, but expanded to calculate signature challenge value twice
+for number in range(0,count):
+    ordered=[0]*(2*count)
+    for index in range(count):
+        rGcK=r_i_j[number][index] * G + c[number] * R[number][index]
+        rHashcK_tilde=r_i_j[number][index] * dumb25519.hash_to_point(R[number][index]) + c[number] * K_tilde_j[index]
+        ordered[index*2]=rGcK
+        ordered[index*2+1]=rHashcK_tilde
+    cprime[number+1]=dumb25519.hash_to_scalar(m, ordered)
+
+# 3. Check c_1 == cprime_1
+if c[0] == cprime[count]:
+    print('Valid')
+
 '''
