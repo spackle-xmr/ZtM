@@ -1,5 +1,3 @@
-# built off https://github.com/coinstudent2048/ecc_tutorials
-
 from dumb25519 import Scalar, Point
 import dumb25519
 
