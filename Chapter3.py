@@ -279,7 +279,7 @@ r_i=[dumb25519.random_scalar() for j in range(count)]
 r_i[pi]=0
 c=[0]*count
 
-# 3. Calculate aggreate public keys W_i for all i, and aggreate key image W_tilde
+# 3. Calculate aggregate public keys W_i for all i, and aggregate key image W_tilde
 W_i=[0]*count
 j_terms=[0]*count
 T_j_raw=['CLSAG_']*count
@@ -287,7 +287,7 @@ T_j=[f'{elm}{index+1}' for index, elm in enumerate(T_j_raw)]
 #T_j=['CLSAG_1', 'CLSAG_2', 'CLSAG_3', 'CLSAG_4', 'CLSAG_5']
 T_c=('CLSAG_c')
 
-# Aggreate public keys W_i for all i
+# Aggregate public keys W_i for all i
 for i in range(count):
     #get sum of j terms
     for j in range(count):
@@ -298,7 +298,7 @@ for i in range(count):
     W_i[i]=j_sum
 
 
-# Aggreate key image W_tilde
+# Aggregate key image W_tilde
 for j in range(count):
         j_terms[j]=dumb25519.hash_to_scalar(T_j[j], R, K_tilde_j) * K_tilde_j[j]
         if j == 0:
@@ -337,11 +337,11 @@ for index in range(count):
     if index == count-1:
         print('Zero Check Passed')
 
-# 2. Calculate aggreate public keys W_i for all i, and aggreate key image W_tilde (same as Signature step 3, without knowledge of private keys)
+# 2. Calculate aggregate public keys W_i for all i, and aggregate key image W_tilde (same as Signature step 3, without knowledge of private keys)
 W_i=[0]*count
 j_terms=[0]*count
 
-# Aggreate public keys W_i for all i
+# Aggregate public keys W_i for all i
 for i in range(count):
     #get sum of j terms
     for j in range(count):
@@ -351,7 +351,7 @@ for i in range(count):
         j_sum = j_sum + j_terms[j]
     W_i[i]=j_sum
 
-# Aggreate key image W_tilde
+# Aggregate key image W_tilde
 for j in range(count):
         j_terms[j]=dumb25519.hash_to_scalar(T_j[j], R, K_tilde_j) * K_tilde_j[j]
         if j == 0:
