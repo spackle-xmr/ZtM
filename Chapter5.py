@@ -63,10 +63,10 @@ count=10 #number of commitments
 a=[Scalar(1)]*count #input values to commit to
 b=[Scalar(1)]*count #output values to commit to
 y=[dumb25519.random_scalar() for i in range(count)] #blinding factors
-gamma=[dumb25519.random_scalar() for i in range(count)] #reference for new generator
-H=[gamma[i] * G for i in range(count)] #new generators
-C_a=[y[i]*G + a[i]*H[i] for i in range(count)]
-C_b=[y[i]*G + b[i]*H[i] for i in range(count)]
+gamma=dumb25519.random_scalar() #reference for new generator
+H=gamma * G #new generator
+C_a=[y[i]*G + a[i]*H for i in range(count)]
+C_b=[y[i]*G + b[i]*H for i in range(count)]
 
 #sum commitments
 C_a_sum= C_a[0]
@@ -95,10 +95,10 @@ for i in range(1,count):
     x_prime_sum=x_prime_sum + x_prime[i-1]
 x_prime[count-1]=y_sum - x_prime_sum
 
-gamma=[dumb25519.random_scalar() for i in range(count)] #reference for new generator
-H=[gamma[i] * G for i in range(count)] #new generators
-C_a=[x[i]*G + a[i]*H[i] for i in range(count)]
-C_a_prime=[x_prime[i]*G + a[i]*H[i] for i in range(count)] #Pseudo output commitment
+gamma=dumb25519.random_scalar() #reference for new generator
+H=gamma * G #new generator
+C_a=[x[i]*G + a[i]*H for i in range(count)]
+C_a_prime=[x_prime[i]*G + a[i]*H for i in range(count)] #Pseudo output commitment
 C_a_delta=[C_a[i] - C_a_prime[i] for i in range(count)]
 z=[x[i] - x_prime[i] for i in range(count)]
 zG=[z[i] * G for i in range(count)]
