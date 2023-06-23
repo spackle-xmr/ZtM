@@ -1,3 +1,4 @@
+#Taken from https://github.com/SarangNoether/skunkworks/blob/rct3/rct3-single/dumb25519.py
 # Dumb25519: a stupid implementation of ed25519
 #
 # Use this code only for prototyping
